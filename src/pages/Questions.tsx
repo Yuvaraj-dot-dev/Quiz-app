@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import '../assets/modules.css'
+import React, { useState } from 'react';
+import '../assets/modules.css';
 
 const Questions = () => {
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedOption, setSelectedOption] = useState<string[]>([]);
-    const [answer, setAnswer] = useState<number[] | string[]>([]);
+    const [answer, setAnswer] = useState<string[]>([]);
     const [option, setOption] = useState<number | string>();
+    const [score, setScore] = useState(0);
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     const quizData = [
         {
@@ -115,37 +117,51 @@ const Questions = () => {
     }
 
     const optionHandler = (e: any) => {
-        console.log(e)
+        // console.log(e)
         setSelectedOption([...selectedOption, e])
         // setOption(e)
         answer[currentQuestion] = e;
     }
 
     const submitHandler = () => {
+        quizData.map((item) => {
+            answer.map((ans) => {
+                if (item.answer === ans) {
+                    setScore((prevScore) => prevScore + 1)
+                }
+            })
+        })
+
+        setIsSubmitted((prevStatus) => !prevStatus)
 
     }
 
-    console.log(answer)
+    console.log("answer", answer)
+    console.log("score", score)
 
     return (
-        <div className='container'>
-            <div>Questions</div>
-            <div>
-                <div className='question'>{quizData[currentQuestion].question}</div>
-                {quizData[currentQuestion].options.map((item) => (
-                    <button className='option' style={{
-                        backgroundColor: selectedOption.includes(item) ? "#007bff" : "#f0f0f0",
-                        color: selectedOption.includes(item) ? "#fff" : "#000",
-                    }} key={item} onClick={() => optionHandler(item)}>{item}</button>
-                ))}
-            </div>
+        <>
+            <div style={{ display: isSubmitted ? 'none' : 'block' }}>Questions</div>
+            <div className='container' style={{ display: isSubmitted ? 'none' : 'block' }}>
+                <div>
+                    <div className='question'>{quizData[currentQuestion].question}</div>
+                    {quizData[currentQuestion].options.map((item) => (
+                        <div className='option' style={{
+                            backgroundColor: answer.includes(item) ? "#007bff" : '',
+                            color: answer.includes(item) ? "#fff" : "",
+                        }} key={item} onClick={() => optionHandler(item)}>{item}</div>
+                    ))}
+                </div>
                 <div className='button-container'>
                     <button className="prevbtn" disabled={currentQuestion === 0} onClick={prevBtnHandler}>Previous</button>
                     <button className="submit" disabled={answer.length !== quizData.length} style={{ display: currentQuestion === quizData.length - 1 ? 'block' : "none" }} onClick={submitHandler}>submit</button>
                     <button className="Nextbtn" disabled={currentQuestion === quizData.length - 1} onClick={nextBtnHandler}>Next</button>
                 </div>
-        </div>
+            </div>
+                <div style={{ display: isSubmitted ? 'block' : 'none' }}>submitted</div>
+                <div style={{ display: isSubmitted ? 'block' : 'none' }}>score: {score} / {quizData.length}</div>
+        </>
     );
 };
 
-export default Questions;
+export default React.memo(Questions);
